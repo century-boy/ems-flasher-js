@@ -1,0 +1,20 @@
+# node
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.vite/
+
+# vercel
+.vercel/
+
+# python reference implementation
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# editors / os
+.DS_Store

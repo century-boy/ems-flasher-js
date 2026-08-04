@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    /*
+     * The core is isomorphic. "DOM" is here only for the globals that exist in
+     * both runtimes — setTimeout, AbortSignal, performance — plus the WebUSB
+     * types; this package must never touch `window` or `document`.
+     */
+    "lib": ["ES2022", "DOM"],
+    "types": ["w3c-web-usb"]
+  },
+  "include": ["src/**/*.ts"]
+}

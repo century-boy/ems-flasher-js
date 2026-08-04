@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  /* Solution file: `tsc --build` walks these, each with its own settings. */
+  "files": [],
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/cli" }
+  ]
+}

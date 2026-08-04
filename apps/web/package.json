@@ -1,0 +1,20 @@
+{
+  "name": "@ems-flasher-js/web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Flash the GB USB smart card 64M from the browser over WebUSB",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ems-flasher-js/core": "1.0.0"
+  },
+  "devDependencies": {
+    "@types/dom-screen-wake-lock": "^1.0.3",
+    "@types/w3c-web-usb": "^1.0.10",
+    "vite": "^6.0.5"
+  }
+}

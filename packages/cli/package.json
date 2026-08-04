@@ -1,0 +1,55 @@
+{
+  "name": "ems-flasher-js",
+  "version": "1.0.0",
+  "description": "Flash the GB USB smart card 64M Game Boy cart from your terminal",
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Mike Ryan",
+      "email": "mikeryan@lacklustre.net",
+      "url": "http://lacklustre.net/gb/ems/"
+    },
+    {
+      "name": "David Wendt JR."
+    },
+    {
+      "name": "Jamie Bainbridge"
+    }
+  ],
+  "homepage": "https://github.com/century-boy/ems-flasher-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/century-boy/ems-flasher-js.git",
+    "directory": "packages/cli"
+  },
+  "type": "module",
+  "bin": {
+    "ems-flasher": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "gameboy",
+    "ems",
+    "flash-cart",
+    "flasher",
+    "usb",
+    "lsdj",
+    "cli"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@ems-flasher-js/core": "1.0.0",
+    "usb": "^2.14.0"
+  }
+}

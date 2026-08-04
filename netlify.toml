@@ -1,0 +1,25 @@
+# The build runs from the repository root, not from apps/web: the web app is a
+# workspace, and its dependencies (vite, typescript, the core) only resolve
+# from the root install. `base` is set explicitly so a base directory left in
+# the Netlify UI cannot move the build into apps/web, where `build:web` does
+# not exist.
+[build]
+  base = "."
+  command = "npm run build:web"
+  publish = "apps/web/dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Vite fingerprints these file names, so they can be cached forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# The page is a single static document; nothing is fetched at runtime.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"

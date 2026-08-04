@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>EMS Flasher — flash Game Boy ROMs, LSDJ and saves from your browser</title>
+    <meta
+      name="description"
+      content="Write Game Boy ROMs, LSDJ and save files to the EMS GB USB smart card 64M straight from your browser over WebUSB. Back up .sav files, fit several games on one bank, no drivers and nothing to install."
+    />
+    <meta
+      name="keywords"
+      content="EMS flasher, GB USB smart card 64M, Game Boy flash cart, LSDJ, chiptune, Little Sound Dj, ROM flasher, gameboy sav backup, WebUSB, EMS 64M, flash cartridge, gbdev, homebrew"
+    />
+    <link rel="canonical" href="https://ems-flasher.netlify.app/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#0a1408" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Social preview: what a link to this page looks like on Reddit, Discord, Mastodon. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="EMS Flasher" />
+    <meta property="og:url" content="https://ems-flasher.netlify.app/" />
+    <meta property="og:title" content="EMS Flasher — flash Game Boy ROMs and LSDJ from your browser" />
+    <meta
+      property="og:description"
+      content="Plug in the EMS GB USB smart card 64M, drop a ROM on the page, done. Save backups and multi-game banks included. No install."
+    />
+    <meta property="og:image" content="https://ems-flasher.netlify.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="EMS Flasher — flash Game Boy ROMs and saves from your browser" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EMS Flasher — flash Game Boy ROMs and LSDJ from your browser" />
+    <meta
+      name="twitter:description"
+      content="Plug in the EMS GB USB smart card 64M, drop a ROM on the page, done. No install."
+    />
+    <meta name="twitter:image" content="https://ems-flasher.netlify.app/og-image.png" />
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23040803'/><rect x='3' y='2' width='10' height='12' fill='%23c8e85c'/><rect x='5' y='4' width='6' height='5' fill='%23040803'/></svg>" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "EMS Flasher",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any browser with WebUSB (Chrome, Edge, Opera)",
+        "url": "https://ems-flasher.netlify.app/",
+        "description": "Browser based flasher for the EMS GB USB smart card 64M Game Boy cartridge: write ROMs and LSDJ, back up and restore saves, and fit several games on one bank.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "license": "https://opensource.org/licenses/MIT",
+        "isAccessibleForFree": true,
+        "keywords": "Game Boy, flash cart, EMS 64M, LSDJ, chiptune, WebUSB, ROM, save backup"
+      }
+    </script>
+  </head>
+  <body>
+    <div class="crt">
+      <header class="masthead">
+        <h1 class="logo">
+          <span class="logo__cart" aria-hidden="true"></span>
+          EMS <span class="logo__accent">Flasher</span>
+        </h1>
+        <p class="tagline">
+          Write ROMs, LSDJ and save files to the <em>GB USB smart card 64M</em>
+          Game Boy flash cart — straight from your browser.
+        </p>
+      </header>
+
+      <!-- Shown when the browser cannot do WebUSB at all. -->
+      <section id="unsupported" class="panel panel--alert" hidden>
+        <h2 class="panel__title">Browser not supported</h2>
+        <p>
+          This page needs <strong>WebUSB</strong>: Chrome, Edge, Opera, or
+          Chrome on Android. Firefox and Safari cannot do it.
+        </p>
+        <p class="muted">
+          Or use the CLI: <code>npm install -g ems-flasher-js</code>
+        </p>
+      </section>
+
+      <!--
+        Connection and bank live above the tabs: both apply to every tab, and
+        keeping them here leaves each panel below with a single job.
+      -->
+      <section id="connect-panel" class="panel panel--bar">
+        <div class="bar">
+          <button id="connect" class="button button--primary" type="button">
+            Connect cart
+          </button>
+          <button id="disconnect" class="button" type="button" hidden>
+            Disconnect
+          </button>
+          <span id="status" class="status status--idle">No cart</span>
+
+          <div id="bank-picker" class="bar__bank" hidden>
+            <span class="bar__label">Bank</span>
+            <div class="segmented" role="radiogroup" aria-label="ROM bank">
+              <label class="segmented__option">
+                <input type="radio" name="bank" value="1" checked />
+                <span>1</span>
+              </label>
+              <label class="segmented__option">
+                <input type="radio" name="bank" value="2" />
+                <span>2</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <p id="connect-hint" class="panel__hint panel__hint--bar">
+          Plug in the cart, then pick it from the dialog.
+        </p>
+      </section>
+
+      <!-- One job per tab, so the page stays short. -->
+      <div id="workspace" hidden>
+        <nav class="tabs" role="tablist" aria-label="What to do with the cart">
+          <button
+            id="tab-games"
+            class="tab"
+            type="button"
+            role="tab"
+            aria-controls="panel-games"
+            aria-selected="true"
+          >
+            Games
+          </button>
+          <button
+            id="tab-write"
+            class="tab"
+            type="button"
+            role="tab"
+            aria-controls="panel-write"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            Write
+          </button>
+          <button
+            id="tab-backup"
+            class="tab"
+            type="button"
+            role="tab"
+            aria-controls="panel-backup"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            Backup
+          </button>
+        </nav>
+
+        <section
+          id="panel-games"
+          class="panel panel--tab"
+          role="tabpanel"
+          aria-labelledby="tab-games"
+        >
+          <div id="games"></div>
+          <div class="row row--stats">
+            <span id="games-usage" class="muted">Scanning…</span>
+            <button id="scan" class="button button--small" type="button">
+              Rescan
+            </button>
+          </div>
+        </section>
+
+        <section
+          id="panel-write"
+          class="panel panel--tab"
+          role="tabpanel"
+          aria-labelledby="tab-write"
+          hidden
+        >
+          <label id="dropzone" class="dropzone" for="file" tabindex="0">
+            <input id="file" class="visually-hidden" type="file" accept=".gb,.gbc,.sav,.bin" />
+            <span class="dropzone__icon" aria-hidden="true"></span>
+            <span id="dropzone-label" class="dropzone__label">
+              Drop a <strong>.gb</strong>, <strong>.gbc</strong> or
+              <strong>.sav</strong> here, or click to choose
+            </span>
+          </label>
+
+          <div class="row row--controls">
+            <div class="field field--inline">
+              <span class="bar__label">Target</span>
+              <div class="segmented" role="radiogroup" aria-label="Address space">
+                <label class="segmented__option">
+                  <input type="radio" name="write-space" value="auto" checked />
+                  <span>Auto</span>
+                </label>
+                <label class="segmented__option">
+                  <input type="radio" name="write-space" value="rom" />
+                  <span>ROM</span>
+                </label>
+                <label class="segmented__option">
+                  <input type="radio" name="write-space" value="sram" />
+                  <span>Save</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="row__actions">
+              <button id="add" class="button" type="button" disabled>
+                Add to bank
+              </button>
+              <button id="write" class="button button--primary" type="button" disabled>
+                Replace bank
+              </button>
+            </div>
+          </div>
+
+          <p class="panel__hint panel__hint--after">
+            <strong>Add</strong> keeps the games already on the bank and puts
+            this one in the first free slot. <strong>Replace</strong> writes at
+            the start of the bank, wiping everything on it.
+          </p>
+        </section>
+
+        <section
+          id="panel-backup"
+          class="panel panel--tab"
+          role="tabpanel"
+          aria-labelledby="tab-backup"
+          hidden
+        >
+          <p class="panel__hint">
+            Dump the whole bank, or the save chip both banks share. A 4 MiB
+            bank takes a couple of minutes; a single game is quicker from the
+            Games tab.
+          </p>
+          <div class="row">
+            <button id="dump-rom" class="button" type="button">
+              Dump ROM bank
+            </button>
+            <button id="dump-sram" class="button" type="button">
+              Dump save
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Progress sits outside the tabs: it belongs to whatever is running. -->
+      <section id="progress-panel" class="panel panel--progress" hidden>
+        <h2 class="panel__title"><span id="progress-label">Working</span></h2>
+        <div id="meter" class="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <div id="meter-fill" class="meter__fill"></div>
+          <span id="meter-text" class="meter__text">0%</span>
+        </div>
+        <div class="row row--stats">
+          <span id="progress-stats" class="muted">—</span>
+          <button id="abort" class="button button--danger button--small" type="button">
+            Stop
+          </button>
+        </div>
+      </section>
+
+      <!-- Folded away by default; opens itself when something goes wrong. -->
+      <details id="log-details" class="panel panel--log">
+        <summary class="log__summary">Log</summary>
+        <pre id="log" class="log" aria-live="polite"></pre>
+      </details>
+
+      <section class="prose">
+        <h2>What this is</h2>
+        <p>
+          EMS Flasher writes Game Boy ROMs and save files to the
+          <strong>EMS GB USB smart card 64M</strong>, the USB flash cartridge
+          sold as the “USB 64M smart card”. It runs entirely in the browser
+          over WebUSB: no drivers, no install, and nothing is uploaded, because
+          the page has no server behind it.
+        </p>
+
+        <h2>What you can do with it</h2>
+        <ul>
+          <li>
+            <strong>Flash a ROM</strong> — drop a <code>.gb</code> or
+            <code>.gbc</code> file on the page and write it to either 4 MiB
+            bank. Homebrew, translations, your own builds.
+          </li>
+          <li>
+            <strong>Run LSDJ</strong> — chiptune musicians use this cart for
+            <em>Little Sound Dj</em> and nanoloop. Write the ROM, then back up
+            the <code>.sav</code> that holds your songs before you overwrite
+            anything.
+          </li>
+          <li>
+            <strong>Back up and restore saves</strong> — the cart has 128 KiB
+            of SRAM shared by both banks. Dump it to a file, restore it later.
+          </li>
+          <li>
+            <strong>Put several games on one bank</strong> — the cart menu
+            lists every ROM it finds, so a bank can hold a whole shelf. Add and
+            remove games one at a time, or pull a single one back out as a
+            working ROM file.
+          </li>
+        </ul>
+
+        <h2>Questions</h2>
+
+        <h3>Which browsers work?</h3>
+        <p>
+          Chrome, Edge, Opera, and Chrome on Android with an OTG cable. Firefox
+          and Safari have both declined to implement WebUSB, so they cannot
+          talk to USB devices at all. On those, use the command line version:
+          <code>npm install -g ems-flasher-js</code>.
+        </p>
+
+        <h3>Do my ROMs get uploaded anywhere?</h3>
+        <p>
+          No. There is no backend. The page reads the file locally and writes
+          it to the cart over USB; the network tab stays empty.
+        </p>
+
+        <h3>Which cartridge does it support?</h3>
+        <p>
+          The EMS 64 Mbit USB flash cart for Game Boy, USB ID
+          <code>4670:9394</code> — 64 Mbit of flash as two 4 MiB banks plus
+          128 KiB of save RAM. Other flash carts speak different protocols and
+          are not supported.
+        </p>
+
+        <h3>Is it free?</h3>
+        <p>
+          Yes, MIT licensed and open source. It is a port of the original C
+          flasher by Mike Ryan, whose reverse engineering — with David Wendt
+          JR. and Jamie Bainbridge — everything here is built on.
+        </p>
+      </section>
+
+      <footer class="footer">
+        <p>
+          Runs locally in your browser.
+          <a href="https://github.com/century-boy/ems-flasher-js">Source on GitHub</a>
+        </p>
+        <p>
+          A port of <a href="http://lacklustre.net/gb/ems/">ems-flasher</a> by
+          Mike Ryan, David Wendt JR. and Jamie Bainbridge.
+        </p>
+      </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

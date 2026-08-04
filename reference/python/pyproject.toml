@@ -1,0 +1,26 @@
+[project]
+name = "ems-flasher"
+version = "0.05"
+description = "Command line flasher for the 64 Mbit EMS USB flash cart for Game Boy"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "COPYING" }
+dependencies = ["pyusb>=1.2"]
+
+[project.scripts]
+ems-flasher = "ems_flasher.cli:main"
+
+[project.urls]
+Homepage = "http://lacklustre.net/gb/ems/"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ems_flasher"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

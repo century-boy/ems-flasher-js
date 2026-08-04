@@ -1,0 +1,844 @@
+/*
+ * Retro gaming skin: the four-tone palette of a DMG screen, hard edges, no
+ * rounded corners, and a faint CRT scanline over the whole page.
+ *
+ * Everything is plain CSS with system fonts — no webfont request, so the page
+ * works offline and loads instantly.
+ */
+
+:root {
+  /*
+   * The Game Boy four-tone ramp, pushed apart until every pair that carries
+   * text clears WCAG AA (4.5:1 for body copy, 3:1 for large text and UI
+   * edges). The DMG look survives; the eye strain does not.
+   */
+  --dmg-darkest: #050b04;
+  --dmg-dark: #2c5422;
+  --dmg-mid: #74a844;
+  --dmg-light: #c8e85c;
+  --dmg-lightest: #ddf87a;
+
+  /* Screen and ink. */
+  --screen: #040803;
+  --panel: #071003;
+  --ink: #e4fbb0;
+  --ink-dim: #c0da8c;
+  --alert: #ffa3a3;
+  --highlight: #f4ffd6;
+
+  /* Disabled controls keep their shape and lose their invitation. */
+  --disabled-edge: #7d9a63;
+  --disabled-ink: #97ab7c;
+
+  --edge: 3px;
+  --gap: 1rem;
+
+  --font-pixel: ui-monospace, "SF Mono", "Cascadia Mono", "Segoe UI Mono", Menlo,
+    Consolas, monospace;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: clamp(1rem, 3vw, 2.5rem) 1rem 3rem;
+  background:
+    radial-gradient(circle at 50% 0%, #14290f 0%, var(--screen) 55%, #020501 100%);
+  color: var(--ink);
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  min-height: 100vh;
+}
+
+/* The scanline overlay. Purely decorative, never intercepts clicks. */
+.crt {
+  position: relative;
+  max-width: 52rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.crt::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  /* Faint enough to read as CRT texture without eating into text contrast. */
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.12) 0 1px,
+    transparent 1px 4px
+  );
+  mix-blend-mode: multiply;
+  z-index: 10;
+}
+
+/* Some people cannot stand the flicker texture; honour the setting. */
+@media (prefers-reduced-motion: reduce) {
+  .crt::after {
+    display: none;
+  }
+}
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  text-align: center;
+  padding: 0.5rem 0 0;
+}
+
+.logo {
+  display: flex;
+  /*
+   * Baseline, not centre: centring aligns the cartridge to the middle of the
+   * line box, which sits lower than the middle of the capitals because of the
+   * space reserved for descenders. Anchoring to the baseline puts it where the
+   * letters actually are, whatever the line height.
+   */
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 0;
+  font-size: clamp(1.6rem, 6vw, 2.6rem);
+  line-height: 1.2;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--highlight);
+  text-shadow: 0 0 12px rgba(200, 232, 92, 0.45);
+}
+
+.logo__accent {
+  color: var(--dmg-light);
+}
+
+/*
+ * A tiny pixel cartridge drawn with box shadows, no image needed.
+ *
+ * An empty inline-block takes its baseline from its bottom edge, so the shape
+ * sits on the text baseline; the nudge below lets it overshoot by as much as
+ * it rises above the cap height, which is what reads as "aligned".
+ */
+.logo__cart {
+  width: 0.8em;
+  height: 0.9em;
+  align-self: baseline;
+  transform: translateY(0.1em);
+  background: var(--dmg-light);
+  box-shadow:
+    inset 0 0.2em 0 0 var(--dmg-darkest),
+    inset 0.18em 0.2em 0 0 var(--dmg-mid),
+    inset -0.18em 0.2em 0 0 var(--dmg-mid);
+}
+
+.tagline {
+  margin: 0.5rem auto 0;
+  max-width: 34rem;
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+.tagline em {
+  color: var(--ink);
+  font-style: normal;
+}
+
+/* ---------- panels ---------- */
+
+.panel {
+  border: var(--edge) solid var(--dmg-mid);
+  background: var(--panel);
+  padding: 1.1rem 1.25rem 1.35rem;
+  /* Hard offset shadow instead of a blur: reads as a pixel-art bevel. */
+  box-shadow: 6px 6px 0 0 rgba(0, 0, 0, 0.75);
+}
+
+.panel__title {
+  margin: 0 0 0.85rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--dmg-light);
+}
+
+.panel__hint {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+}
+
+.panel--alert {
+  border-color: var(--alert);
+}
+
+.panel--alert .panel__title {
+  color: var(--alert);
+}
+
+.panel--log {
+  background: #060d05;
+}
+
+/* ---------- controls ---------- */
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.row--options {
+  gap: 1.5rem;
+  margin: 1.15rem 0;
+}
+
+.row--stats {
+  justify-content: space-between;
+  margin-top: 0.9rem;
+}
+
+/*
+ * Every button is the same object: same box, same weight, same height. Only
+ * the fill changes between a primary and a secondary, so a disabled primary
+ * still reads as the same button rather than as a different component.
+ */
+.button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.9rem;
+  padding: 0 1.25rem;
+  border: var(--edge) solid var(--dmg-light);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.05s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--dmg-mid);
+  color: var(--highlight);
+}
+
+/* Buttons physically press in, like a console face button. */
+.button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+}
+
+/* Dimming with opacity washed the fill out; an explicit palette keeps it legible. */
+.button:disabled {
+  border-color: var(--disabled-edge);
+  background: transparent;
+  color: var(--disabled-ink);
+  cursor: not-allowed;
+}
+
+.button--primary {
+  background: var(--dmg-light);
+  border-color: var(--dmg-lightest);
+  color: #071003;
+}
+
+.button--primary:hover:not(:disabled) {
+  background: var(--highlight);
+  border-color: var(--highlight);
+  color: #071003;
+}
+
+.button--danger {
+  border-color: var(--alert);
+  color: var(--alert);
+}
+
+.button--danger:hover:not(:disabled) {
+  background: var(--alert);
+  color: #2b0505;
+}
+
+.button:focus-visible,
+.dropzone:focus-visible,
+.segmented__option input:focus-visible + span {
+  outline: var(--edge) solid var(--highlight);
+  outline-offset: 2px;
+}
+
+/* ---------- status pill ---------- */
+
+/*
+ * A status readout, not a control: no full border, so it cannot be mistaken
+ * for a button sitting next to the real ones.
+ */
+.status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.9rem;
+  padding: 0 0.9rem;
+  border-left: var(--edge) solid currentColor;
+  background: rgba(4, 8, 3, 0.9);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.status--idle {
+  color: var(--ink-dim);
+}
+
+.status--busy {
+  color: var(--highlight);
+  animation: blink 1s steps(2, start) infinite;
+}
+
+.status--ready {
+  color: var(--dmg-lightest);
+}
+
+.status--error {
+  color: var(--alert);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status--busy {
+    animation: none;
+  }
+}
+
+/* ---------- bank cards ---------- */
+
+.banks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.bank {
+  border: 2px solid var(--dmg-dark);
+  padding: 0.85rem 1rem;
+  background: #0a1207;
+}
+
+.bank__name {
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+
+.bank__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  color: var(--highlight);
+  word-break: break-all;
+}
+
+.bank__meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+}
+
+.bank__warning {
+  margin: 0.5rem 0 0;
+  font-size: 0.72rem;
+  color: #ffb4b4;
+}
+
+/* ---------- dropzone ---------- */
+
+.dropzone {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: var(--edge) dashed var(--dmg-mid);
+  padding: 1.4rem 1.2rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.dropzone:hover,
+.dropzone.is-hover {
+  border-color: var(--dmg-light);
+  background: rgba(116, 168, 68, 0.18);
+}
+
+.dropzone.is-loaded {
+  border-style: solid;
+  border-color: var(--dmg-light);
+}
+
+/* A pixel floppy/cart glyph, again drawn with shadows. */
+.dropzone__icon {
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.6rem;
+  background: var(--dmg-mid);
+  box-shadow:
+    inset 0 0.35rem 0 0 var(--dmg-darkest),
+    inset 0.3rem 0.35rem 0 0 var(--dmg-light),
+    inset -0.3rem 0.35rem 0 0 var(--dmg-light);
+}
+
+.dropzone__label {
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.dropzone__label strong {
+  color: var(--highlight);
+  font-weight: 400;
+}
+
+/* ---------- segmented radios ---------- */
+
+.field {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.field legend {
+  padding: 0 0 0.45rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.segmented {
+  display: inline-flex;
+  border: 2px solid var(--dmg-mid);
+}
+
+.segmented__option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segmented__option span {
+  display: block;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--ink-dim);
+}
+
+.segmented__option input:checked + span {
+  background: var(--dmg-light);
+  color: var(--dmg-darkest);
+}
+
+/* ---------- progress meter ---------- */
+
+.panel--progress {
+  border-color: var(--dmg-light);
+}
+
+.meter {
+  position: relative;
+  height: 2rem;
+  border: var(--edge) solid var(--dmg-light);
+  background: #060d05;
+  overflow: hidden;
+}
+
+/*
+ * The fill is a repeating hard-edged gradient, so it reads as a row of pixel
+ * blocks marching across rather than a smooth modern bar.
+ */
+.meter__fill {
+  height: 100%;
+  width: 0;
+  background: repeating-linear-gradient(
+    to right,
+    var(--dmg-light) 0 12px,
+    var(--dmg-mid) 12px 16px
+  );
+  transition: width 0.12s linear;
+}
+
+.meter__text {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  color: var(--highlight);
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+}
+
+/* ---------- log ---------- */
+
+.log {
+  margin: 0.75rem 0 0;
+  max-height: 11rem;
+  overflow-y: auto;
+  font-size: 0.76rem;
+  line-height: 1.75;
+  color: var(--ink-dim);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.log__line--error {
+  color: #ff9b9b;
+}
+
+.log__line--success {
+  color: var(--dmg-lightest);
+}
+
+/* ---------- misc ---------- */
+
+.muted {
+  color: var(--ink-dim);
+  font-size: 0.78rem;
+}
+
+code {
+  background: #060d05;
+  border: 1px solid var(--dmg-dark);
+  padding: 0.1rem 0.35rem;
+  font-size: 0.78rem;
+  color: var(--highlight);
+}
+
+a {
+  color: var(--dmg-lightest);
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+  padding-bottom: 1rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ---------- game list ---------- */
+
+.games {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.games__empty {
+  padding: 0.9rem 1rem;
+  border: 2px dashed var(--dmg-dark);
+  color: var(--ink-dim);
+  font-size: 0.8rem;
+}
+
+/* One row per game: index, title, where it sits, and what you can do with it. */
+.game {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--dmg-dark);
+  background: #0a1207;
+}
+
+.game__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.game__index {
+  font-size: 0.75rem;
+  color: var(--dmg-light);
+  text-align: right;
+}
+
+.game__title {
+  color: var(--highlight);
+  word-break: break-all;
+}
+
+.game__meta {
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* The row buttons must not tower over the row itself, nor squash their label. */
+.button--small {
+  min-height: 2.1rem;
+  padding: 0 0.85rem;
+  font-size: 0.7rem;
+  border-width: 2px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* A note that explains the buttons above it, rather than introducing them. */
+.panel__hint--after {
+  margin: 1rem 0 0;
+}
+
+.panel__hint--after strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* Narrow screens: title on the first line, details and actions underneath. */
+@media (max-width: 34rem) {
+  .game {
+    grid-template-columns: 2rem minmax(0, 1fr);
+  }
+
+  .game__meta,
+  .game__actions {
+    grid-column: 2;
+  }
+
+  .game__meta {
+    font-size: 0.7rem;
+  }
+}
+
+/* ---------- toolbar ---------- */
+
+/* Connection and bank on one line: they apply to every tab. */
+.panel--bar {
+  padding: 0.85rem 1rem;
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bar__bank {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* Pushed to the far end, away from the connection controls. */
+  margin-left: auto;
+}
+
+.bar__label {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.panel__hint--bar {
+  margin: 0.7rem 0 0;
+}
+
+/* ---------- tabs ---------- */
+
+.tabs {
+  display: flex;
+  gap: 0.35rem;
+  /* Sits on top of the panel below, sharing its edge. */
+  margin-bottom: calc(var(--edge) * -1);
+}
+
+.tab {
+  appearance: none;
+  border: var(--edge) solid var(--dmg-mid);
+  border-bottom: none;
+  background: var(--screen);
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.6rem 1.1rem;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+/* The selected tab merges into its panel, which is what makes it read as one. */
+.tab[aria-selected="true"] {
+  border-color: var(--dmg-light);
+  background: var(--panel);
+  color: var(--highlight);
+}
+
+.tab:focus-visible {
+  outline: var(--edge) solid var(--highlight);
+  outline-offset: -3px;
+}
+
+.panel--tab {
+  border-color: var(--dmg-light);
+}
+
+/* ---------- write panel layout ---------- */
+
+.row--controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.field--inline {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.row__actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-left: auto;
+}
+
+/* ---------- collapsible log ---------- */
+
+details.panel--log {
+  padding: 0.75rem 1rem;
+}
+
+.log__summary {
+  cursor: pointer;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dmg-light);
+  list-style: none;
+}
+
+.log__summary::-webkit-details-marker {
+  display: none;
+}
+
+/* A caret drawn in text, so no icon font is needed. */
+.log__summary::before {
+  content: "▸ ";
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+details[open] > .log__summary::before {
+  content: "▾ ";
+}
+
+.log__summary:focus-visible {
+  outline: var(--edge) solid var(--highlight);
+  outline-offset: 2px;
+}
+
+@media (max-width: 34rem) {
+  .bar__bank,
+  .row__actions {
+    margin-left: 0;
+  }
+
+  .tabs {
+    /* Tabs share the width rather than wrapping onto two rows. */
+    gap: 0.25rem;
+  }
+
+  .tab {
+    flex: 1 1 0;
+    padding: 0.6rem 0.4rem;
+    text-align: center;
+  }
+}
+
+/* ---------- prose ---------- */
+
+/*
+ * The explanatory text below the tool. It is there for people who arrive from
+ * a search engine and need to know what this is before plugging anything in,
+ * so it sits after the app rather than in front of it.
+ */
+.prose {
+  max-width: 44rem;
+  margin: 1rem auto 0;
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+  line-height: 1.8;
+}
+
+.prose h2 {
+  margin: 2rem 0 0.6rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dmg-light);
+}
+
+.prose h3 {
+  margin: 1.4rem 0 0.4rem;
+  font-size: 0.85rem;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.prose p {
+  margin: 0 0 0.8rem;
+}
+
+.prose ul {
+  margin: 0 0 0.8rem;
+  padding-left: 1.1rem;
+}
+
+.prose li {
+  margin-bottom: 0.6rem;
+}
+
+.prose strong {
+  color: var(--ink);
+}
+
+.prose em {
+  color: var(--ink);
+  font-style: normal;
+}

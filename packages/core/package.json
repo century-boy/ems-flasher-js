@@ -1,0 +1,50 @@
+{
+  "name": "@ems-flasher-js/core",
+  "version": "1.0.0",
+  "description": "Protocol, memory map and header decoding for the EMS 64 Mbit USB flash cart",
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Mike Ryan",
+      "email": "mikeryan@lacklustre.net",
+      "url": "http://lacklustre.net/gb/ems/"
+    },
+    {
+      "name": "David Wendt JR."
+    },
+    {
+      "name": "Jamie Bainbridge"
+    }
+  ],
+  "homepage": "https://github.com/century-boy/ems-flasher-js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/century-boy/ems-flasher-js.git",
+    "directory": "packages/core"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "gameboy",
+    "ems",
+    "flash-cart",
+    "webusb",
+    "usb"
+  ],
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "devDependencies": {
+    "@types/w3c-web-usb": "^1.0.10"
+  }
+}
